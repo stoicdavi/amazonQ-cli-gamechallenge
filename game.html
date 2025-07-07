@@ -8,6 +8,9 @@
 </head>
 <body>
     <div class="game-container">
+        <div class="back-button-container">
+            <button class="back-button" onclick="goHome()">← Back to Menu</button>
+        </div>
         <div class="hud">
             <div>Score: <span id="score">0</span></div>
             <div>Wave: <span id="wave">1</span></div>
@@ -29,5 +32,10 @@
     </div>
 
     <script src="game.js"></script>
+    <script>
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+    </script>
 </body>
 </html>
