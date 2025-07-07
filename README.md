@@ -40,7 +40,6 @@ GameChallengeAmazonQ/
 ├── style.css               # Robotron 2084 game styles
 ├── landing.css             # Landing page styles
 ├── game.js                 # Robotron 2084 game logic
-├── USER_MANUAL.md          # Detailed game manual
 └── README.md               # This file
 ```
 
