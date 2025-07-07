@@ -17,6 +17,8 @@ class Robotron2084 {
         this.lives = 3;
         this.gameRunning = true;
         
+        this.soundManager = new SoundManager();
+        
         this.init();
     }
     
@@ -109,6 +111,7 @@ class Robotron2084 {
                 dy: dy * 8,
                 size: 3
             });
+            this.soundManager.play('shoot');
         }
     }
     
@@ -178,6 +181,7 @@ class Robotron2084 {
                     this.robots.splice(robotIndex, 1);
                     this.bullets.splice(bulletIndex, 1);
                     this.score += robot.type === 'hulk' ? 150 : 100;
+                    this.soundManager.play('robotDestroyed');
                 }
             });
         });
@@ -203,6 +207,7 @@ class Robotron2084 {
             if (this.distance(this.player, human) < this.player.size + human.size + 5) {
                 this.humans.splice(humanIndex, 1);
                 this.score += 1000;
+                this.soundManager.play('humanRescued');
             }
         });
     }
@@ -210,6 +215,7 @@ class Robotron2084 {
     playerHit() {
         this.lives--;
         this.createExplosion(this.player.x, this.player.y);
+        this.soundManager.play('playerHit');
         
         if (this.lives <= 0) {
             this.gameOver();
@@ -237,6 +243,7 @@ class Robotron2084 {
         if (this.robots.length === 0) {
             this.wave++;
             this.score += this.humans.length * 500; // Bonus for surviving humans
+            this.soundManager.play('waveComplete');
             this.spawnWave();
         }
     }
@@ -311,4 +318,16 @@ class Robotron2084 {
     }
 }
 
-new Robotron2084();
+let game;
+
+function toggleSound() {
+    if (game && game.soundManager) {
+        const enabled = game.soundManager.toggle();
+        const button = document.getElementById('soundToggle');
+        button.textContent = enabled ? '🔊' : '🔇';
+        button.classList.toggle('muted', !enabled);
+    }
+}
+
+// Initialize game
+game = new Robotron2084();

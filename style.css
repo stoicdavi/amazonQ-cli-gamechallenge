@@ -58,6 +58,26 @@ canvas {
     color: #000;
 }
 
+.sound-toggle {
+    background: rgba(0, 170, 0, 0.8);
+    color: #fff;
+    border: 1px solid #0f0;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.sound-toggle:hover {
+    background: rgba(0, 255, 0, 0.9);
+}
+
+.sound-toggle.muted {
+    background: rgba(170, 0, 0, 0.8);
+    border-color: #f00;
+}
+
 .game-over {
     position: absolute;
     top: 50%;
