@@ -34,6 +34,30 @@ canvas {
     color: #0a0;
 }
 
+.back-button-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+}
+
+.back-button {
+    background: rgba(0, 170, 0, 0.8);
+    color: #fff;
+    border: 1px solid #0f0;
+    padding: 8px 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.back-button:hover {
+    background: rgba(0, 255, 0, 0.9);
+    color: #000;
+}
+
 .game-over {
     position: absolute;
     top: 50%;
