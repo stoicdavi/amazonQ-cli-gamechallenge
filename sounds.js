@@ -17,48 +17,135 @@ class SoundManager {
     }
     
     createSounds() {
-        // Shoot sound - short beep
-        this.sounds.shoot = this.createTone(800, 0.1, 'square');
+        // Laser shoot - sci-fi pew
+        this.sounds.shoot = { type: 'laser' };
         
-        // Robot destroyed - explosion
-        this.sounds.robotDestroyed = this.createTone(200, 0.3, 'sawtooth');
+        // Robot explosion - dramatic boom
+        this.sounds.robotDestroyed = { type: 'explosion' };
         
-        // Human rescued - positive chime
-        this.sounds.humanRescued = this.createTone(600, 0.2, 'sine');
+        // Human rescued - magical chime
+        this.sounds.humanRescued = { type: 'rescue' };
         
-        // Player hit - negative buzz
-        this.sounds.playerHit = this.createTone(150, 0.5, 'sawtooth');
+        // Player hit - electric zap
+        this.sounds.playerHit = { type: 'damage' };
         
-        // Wave complete - victory sound
-        this.sounds.waveComplete = this.createTone(400, 0.4, 'triangle');
+        // Wave complete - triumphant fanfare
+        this.sounds.waveComplete = { type: 'victory' };
     }
     
-    createTone(frequency, duration, type = 'sine') {
-        return {
-            frequency: frequency,
-            duration: duration,
-            type: type
-        };
+    playLaser() {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        osc.connect(gain).connect(this.audioContext.destination);
+        
+        osc.frequency.setValueAtTime(1000, this.audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, this.audioContext.currentTime + 0.1);
+        osc.type = 'sawtooth';
+        
+        gain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+        
+        osc.start();
+        osc.stop(this.audioContext.currentTime + 0.1);
+    }
+    
+    playExplosion() {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        const filter = this.audioContext.createBiquadFilter();
+        
+        osc.connect(filter).connect(gain).connect(this.audioContext.destination);
+        
+        osc.frequency.setValueAtTime(200, this.audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(50, this.audioContext.currentTime + 0.3);
+        osc.type = 'sawtooth';
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2000, this.audioContext.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.3);
+        
+        gain.gain.setValueAtTime(0.4, this.audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+        
+        osc.start();
+        osc.stop(this.audioContext.currentTime + 0.3);
+    }
+    
+    playRescue() {
+        const frequencies = [523, 659, 784]; // C, E, G chord
+        frequencies.forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+            osc.connect(gain).connect(this.audioContext.destination);
+            
+            osc.frequency.setValueAtTime(freq, this.audioContext.currentTime + i * 0.1);
+            osc.type = 'sine';
+            
+            gain.gain.setValueAtTime(0.2, this.audioContext.currentTime + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + i * 0.1 + 0.3);
+            
+            osc.start(this.audioContext.currentTime + i * 0.1);
+            osc.stop(this.audioContext.currentTime + i * 0.1 + 0.3);
+        });
+    }
+    
+    playDamage() {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        osc.connect(gain).connect(this.audioContext.destination);
+        
+        osc.frequency.setValueAtTime(150, this.audioContext.currentTime);
+        osc.frequency.linearRampToValueAtTime(100, this.audioContext.currentTime + 0.1);
+        osc.frequency.linearRampToValueAtTime(200, this.audioContext.currentTime + 0.2);
+        osc.frequency.linearRampToValueAtTime(80, this.audioContext.currentTime + 0.4);
+        osc.type = 'square';
+        
+        gain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.4);
+        
+        osc.start();
+        osc.stop(this.audioContext.currentTime + 0.4);
+    }
+    
+    playVictory() {
+        const melody = [523, 659, 784, 1047]; // C, E, G, C octave
+        melody.forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+            osc.connect(gain).connect(this.audioContext.destination);
+            
+            osc.frequency.setValueAtTime(freq, this.audioContext.currentTime + i * 0.15);
+            osc.type = 'triangle';
+            
+            gain.gain.setValueAtTime(0.25, this.audioContext.currentTime + i * 0.15);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + i * 0.15 + 0.4);
+            
+            osc.start(this.audioContext.currentTime + i * 0.15);
+            osc.stop(this.audioContext.currentTime + i * 0.15 + 0.4);
+        });
     }
     
     play(soundName) {
         if (!this.enabled || !this.audioContext || !this.sounds[soundName]) return;
         
         const sound = this.sounds[soundName];
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(sound.frequency, this.audioContext.currentTime);
-        oscillator.type = sound.type;
-        
-        gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + sound.duration);
-        
-        oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + sound.duration);
+        switch(sound.type) {
+            case 'laser':
+                this.playLaser();
+                break;
+            case 'explosion':
+                this.playExplosion();
+                break;
+            case 'rescue':
+                this.playRescue();
+                break;
+            case 'damage':
+                this.playDamage();
+                break;
+            case 'victory':
+                this.playVictory();
+                break;
+        }
     }
     
     toggle() {
