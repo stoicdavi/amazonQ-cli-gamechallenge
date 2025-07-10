@@ -17,6 +17,18 @@ class Robotron2084 {
         this.lives = 3;
         this.gameRunning = true;
         
+        // Achievement tracking
+        this.achievements = {
+            humansRescued: 0,
+            robotsDestroyed: 0,
+            wavesCompleted: 0,
+            perfectWaves: 0, // waves with all humans saved
+            consecutiveRescues: 0,
+            maxConsecutiveRescues: 0
+        };
+        
+        this.congratsTimeout = null;
+        
         this.soundManager = new SoundManager();
         
         this.init();
@@ -181,7 +193,18 @@ class Robotron2084 {
                     this.robots.splice(robotIndex, 1);
                     this.bullets.splice(bulletIndex, 1);
                     this.score += robot.type === 'hulk' ? 150 : 100;
+                    this.achievements.robotsDestroyed++;
                     this.soundManager.play('robotDestroyed');
+                    
+                    // Check for robot destruction milestones
+                    if (this.achievements.robotsDestroyed === 50) {
+                        this.showCongratulations("Robot Slayer!", "50 robots destroyed!", 
+                            "Your aim is getting deadly!\nKeep up the great work!");
+                    } else if (this.achievements.robotsDestroyed === 100) {
+                        this.showCongratulations("Terminator!", "100 robots eliminated!", 
+                            "You're a robot-destroying machine!\nBonus: +3000 points");
+                        this.score += 3000;
+                    }
                 }
             });
         });
@@ -198,6 +221,7 @@ class Robotron2084 {
             this.humans.forEach((human, humanIndex) => {
                 if (this.distance(robot, human) < robot.size + human.size) {
                     this.humans.splice(humanIndex, 1);
+                    this.consecutiveRescues = 0; // Reset rescue streak
                 }
             });
         });
@@ -207,13 +231,36 @@ class Robotron2084 {
             if (this.distance(this.player, human) < this.player.size + human.size + 5) {
                 this.humans.splice(humanIndex, 1);
                 this.score += 1000;
+                this.achievements.humansRescued++;
+                this.achievements.consecutiveRescues++;
+                
+                if (this.achievements.consecutiveRescues > this.achievements.maxConsecutiveRescues) {
+                    this.achievements.maxConsecutiveRescues = this.achievements.consecutiveRescues;
+                }
+                
                 this.soundManager.play('humanRescued');
+                
+                // Check for rescue achievements
+                if (this.achievements.humansRescued === 10) {
+                    this.showCongratulations("Life Saver!", "10 humans rescued!", 
+                        "You're a true hero!\nRescue Bonus: +2000 points");
+                    this.score += 2000;
+                } else if (this.achievements.humansRescued === 50) {
+                    this.showCongratulations("Humanity's Champion!", "50 humans saved!", 
+                        "Your dedication is inspiring!\nSpecial Bonus: +5000 points");
+                    this.score += 5000;
+                } else if (this.achievements.consecutiveRescues === 5) {
+                    this.showCongratulations("Rescue Streak!", "5 consecutive rescues!", 
+                        "Amazing rescue chain!\nStreak Bonus: +1500 points");
+                    this.score += 1500;
+                }
             }
         });
     }
     
     playerHit() {
         this.lives--;
+        this.achievements.consecutiveRescues = 0; // Reset rescue streak when hit
         this.createExplosion(this.player.x, this.player.y);
         this.soundManager.play('playerHit');
         
@@ -241,11 +288,92 @@ class Robotron2084 {
     
     checkWaveComplete() {
         if (this.robots.length === 0) {
+            const humansAtStart = 8;
+            const humansSaved = this.humans.length;
+            const perfectWave = humansSaved === humansAtStart;
+            
             this.wave++;
-            this.score += this.humans.length * 500; // Bonus for surviving humans
+            this.achievements.wavesCompleted++;
+            this.score += humansSaved * 500; // Bonus for surviving humans
+            
+            if (perfectWave) {
+                this.achievements.perfectWaves++;
+            }
+            
             this.soundManager.play('waveComplete');
+            this.checkAchievements(perfectWave, humansSaved);
             this.spawnWave();
         }
+    }
+    
+    checkAchievements(perfectWave, humansSaved) {
+        // Wave completion achievements
+        if (this.achievements.wavesCompleted === 1) {
+            this.showCongratulations("First Victory!", "You completed your first wave!", 
+                `Humans Saved: ${humansSaved}/8\nBonus Points: ${humansSaved * 500}`);
+        } else if (this.achievements.wavesCompleted === 5) {
+            this.showCongratulations("Wave Warrior!", "5 waves completed!", 
+                `You're becoming a true defender!\nTotal Score: ${this.score}`);
+        } else if (this.achievements.wavesCompleted === 10) {
+            this.showCongratulations("Robotron Veteran!", "10 waves completed!", 
+                `Outstanding performance!\nRobots Destroyed: ${this.achievements.robotsDestroyed}`);
+        } else if (this.achievements.wavesCompleted % 5 === 0) {
+            this.showCongratulations("Wave Master!", `${this.achievements.wavesCompleted} waves completed!`, 
+                `Keep up the excellent work!\nCurrent Score: ${this.score}`);
+        }
+        
+        // Perfect wave achievements
+        if (perfectWave) {
+            if (this.achievements.perfectWaves === 1) {
+                this.showCongratulations("Perfect Protector!", "All humans saved in a wave!", 
+                    "No human left behind!\nPerfect Wave Bonus: +2000 points");
+                this.score += 2000;
+            } else if (this.achievements.perfectWaves === 3) {
+                this.showCongratulations("Guardian Angel!", "3 perfect waves completed!", 
+                    "Your protection skills are legendary!\nSpecial Bonus: +5000 points");
+                this.score += 5000;
+            }
+        }
+        
+        // Score milestones
+        if (this.score >= 50000 && this.score - (humansSaved * 500) < 50000) {
+            this.showCongratulations("High Scorer!", "50,000 points reached!", 
+                `Excellent gameplay!\nWaves Completed: ${this.achievements.wavesCompleted}`);
+        } else if (this.score >= 100000 && this.score - (humansSaved * 500) < 100000) {
+            this.showCongratulations("Score Legend!", "100,000 points achieved!", 
+                `Incredible performance!\nYou're in the hall of fame!`);
+        }
+    }
+    
+    showCongratulations(title, message, details) {
+        const congratsDiv = document.getElementById('congratulations');
+        const titleElement = document.getElementById('congratsTitle');
+        const messageElement = document.getElementById('congratsMessage');
+        const detailsElement = document.getElementById('congratsDetails');
+        
+        titleElement.textContent = `🎉 ${title} 🎉`;
+        messageElement.textContent = message;
+        detailsElement.textContent = details;
+        
+        congratsDiv.style.display = 'block';
+        
+        // Clear any existing timeout
+        if (this.congratsTimeout) {
+            clearTimeout(this.congratsTimeout);
+        }
+        
+        // Auto-hide after 4 seconds
+        this.congratsTimeout = setTimeout(() => {
+            congratsDiv.style.display = 'none';
+        }, 4000);
+        
+        // Allow manual dismissal by clicking
+        congratsDiv.onclick = () => {
+            congratsDiv.style.display = 'none';
+            if (this.congratsTimeout) {
+                clearTimeout(this.congratsTimeout);
+            }
+        };
     }
     
     distance(a, b) {
@@ -307,6 +435,23 @@ class Robotron2084 {
         this.gameRunning = true;
         this.player.x = 400;
         this.player.y = 300;
+        
+        // Reset achievements for new game
+        this.achievements = {
+            humansRescued: 0,
+            robotsDestroyed: 0,
+            wavesCompleted: 0,
+            perfectWaves: 0,
+            consecutiveRescues: 0,
+            maxConsecutiveRescues: 0
+        };
+        
+        // Hide any congratulations popup
+        document.getElementById('congratulations').style.display = 'none';
+        if (this.congratsTimeout) {
+            clearTimeout(this.congratsTimeout);
+        }
+        
         document.getElementById('gameOver').style.display = 'none';
         this.spawnWave();
     }

@@ -88,3 +88,55 @@ canvas {
     border: 2px solid #0f0;
     display: none;
 }
+
+.congratulations {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 50, 0, 0.95);
+    padding: 30px;
+    border: 3px solid #0f0;
+    border-radius: 10px;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 0 20px #0f0;
+    animation: congratsGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes congratsGlow {
+    from { box-shadow: 0 0 20px #0f0; }
+    to { box-shadow: 0 0 30px #0f0, 0 0 40px #0a0; }
+}
+
+.congrats-content {
+    text-align: center;
+    color: #0f0;
+}
+
+.congrats-content h2 {
+    margin: 0 0 15px 0;
+    font-size: 24px;
+    text-shadow: 0 0 10px #0f0;
+    animation: congratsText 1s ease-in-out;
+}
+
+@keyframes congratsText {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.congrats-content p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.congrats-details {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #0a0;
+    border-radius: 5px;
+    font-size: 14px;
+}
