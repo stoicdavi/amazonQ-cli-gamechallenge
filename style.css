@@ -182,34 +182,48 @@ canvas {
 
 .congratulations {
     position: absolute;
-    top: 50%;
+    top: 20%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 50, 0, 0.95);
-    padding: 30px;
-    border: 3px solid #0f0;
+    background: rgba(0, 50, 0, 0.3);
+    padding: 20px;
+    border: 2px solid rgba(0, 255, 0, 0.6);
     border-radius: 10px;
     display: none;
     z-index: 1000;
-    box-shadow: 0 0 20px #0f0;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
     animation: congratsGlow 2s ease-in-out infinite alternate;
+    max-width: 300px;
+    backdrop-filter: blur(2px);
 }
 
 @keyframes congratsGlow {
-    from { box-shadow: 0 0 20px #0f0; }
-    to { box-shadow: 0 0 30px #0f0, 0 0 40px #0a0; }
+    from { box-shadow: 0 0 15px rgba(0, 255, 0, 0.4); }
+    to { box-shadow: 0 0 20px rgba(0, 255, 0, 0.6), 0 0 25px rgba(0, 170, 0, 0.3); }
 }
 
 .congrats-content {
     text-align: center;
-    color: #0f0;
+    color: rgba(0, 255, 0, 0.9);
 }
 
 .congrats-content h2 {
-    margin: 0 0 15px 0;
-    font-size: 24px;
-    text-shadow: 0 0 10px #0f0;
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
     animation: congratsText 1s ease-in-out;
+}
+
+.congrats-content p {
+    margin: 5px 0;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.congrats-details {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 8px;
 }
 
 @keyframes congratsText {

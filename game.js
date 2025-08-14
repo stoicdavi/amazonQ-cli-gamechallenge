@@ -363,10 +363,10 @@ class Robotron2084 {
             clearTimeout(this.congratsTimeout);
         }
         
-        // Auto-hide after 4 seconds
+        // Auto-hide after 2.5 seconds
         this.congratsTimeout = setTimeout(() => {
             congratsDiv.style.display = 'none';
-        }, 4000);
+        }, 2500);
         
         // Allow manual dismissal by clicking
         congratsDiv.onclick = () => {
