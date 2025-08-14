@@ -30,6 +30,7 @@ class Robotron2084 {
         this.congratsTimeout = null;
         
         this.soundManager = new SoundManager();
+        this.highScoreManager = new HighScoreManager();
         
         this.init();
     }
@@ -420,12 +421,98 @@ class Robotron2084 {
         document.getElementById('wave').textContent = this.wave;
         document.getElementById('humans').textContent = this.humans.length;
         document.getElementById('lives').textContent = this.lives;
+        document.getElementById('highScore').textContent = this.highScoreManager.getHighScore();
     }
     
     gameOver() {
         this.gameRunning = false;
+        
+        // Save the score and get ranking
+        const rank = this.highScoreManager.addScore(this.score, this.wave, this.achievements);
+        const isNewHighScore = this.highScoreManager.isNewHighScore(this.score);
+        const isTopTen = this.highScoreManager.isTopTenScore(this.score);
+        
+        // Update game over display
         document.getElementById('finalScore').textContent = this.score;
+        document.getElementById('finalWave').textContent = this.wave;
+        document.getElementById('finalHumansRescued').textContent = this.achievements.humansRescued;
+        document.getElementById('finalRobotsDestroyed').textContent = this.achievements.robotsDestroyed;
+        
+        // Show ranking information
+        const rankingElement = document.getElementById('scoreRanking');
+        if (isNewHighScore) {
+            rankingElement.innerHTML = '🏆 NEW HIGH SCORE! 🏆';
+            rankingElement.className = 'score-ranking new-high-score';
+        } else if (rank && rank <= 10) {
+            rankingElement.innerHTML = `🎯 Rank #${rank} in Top 10!`;
+            rankingElement.className = 'score-ranking top-ten';
+        } else if (isTopTen) {
+            rankingElement.innerHTML = '📈 Made it to Top 10!';
+            rankingElement.className = 'score-ranking top-ten';
+        } else {
+            rankingElement.innerHTML = 'Keep trying for the Top 10!';
+            rankingElement.className = 'score-ranking';
+        }
+        
         document.getElementById('gameOver').style.display = 'block';
+        this.updateHighScoreDisplay();
+    }
+    
+    updateHighScoreDisplay() {
+        const scores = this.highScoreManager.getScores();
+        const scoresContainer = document.getElementById('highScoresList');
+        const statsContainer = document.getElementById('highScoreStats');
+        
+        // Update scores list
+        if (scores.length === 0) {
+            scoresContainer.innerHTML = '<div class="no-scores">No scores yet. Start playing to set your first record!</div>';
+        } else {
+            scoresContainer.innerHTML = scores.map((score, index) => `
+                <div class="score-entry ${index === 0 ? 'best-score' : ''}">
+                    <div class="score-rank">#${index + 1}</div>
+                    <div class="score-details">
+                        <div class="score-points">${score.score.toLocaleString()}</div>
+                        <div class="score-info">
+                            Wave ${score.wave} • ${score.achievements.humansRescued} humans saved
+                        </div>
+                        <div class="score-date">${this.highScoreManager.formatDate(score.date)}</div>
+                    </div>
+                    <div class="score-achievements">
+                        <span title="Robots Destroyed">🤖 ${score.achievements.robotsDestroyed}</span>
+                        <span title="Perfect Waves">⭐ ${score.achievements.perfectWaves}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Update statistics
+        const stats = this.highScoreManager.getScoreStats();
+        statsContainer.innerHTML = `
+            <div class="stat-item">
+                <div class="stat-value">${stats.totalGames}</div>
+                <div class="stat-label">Games Played</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.averageScore.toLocaleString()}</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.totalHumansRescued}</div>
+                <div class="stat-label">Humans Rescued</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.totalRobotsDestroyed}</div>
+                <div class="stat-label">Robots Destroyed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.totalWavesCompleted}</div>
+                <div class="stat-label">Waves Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.totalPerfectWaves}</div>
+                <div class="stat-label">Perfect Waves</div>
+            </div>
+        `;
     }
     
     restart() {
@@ -453,6 +540,7 @@ class Robotron2084 {
         }
         
         document.getElementById('gameOver').style.display = 'none';
+        document.getElementById('highScorePanel').style.display = 'none';
         this.spawnWave();
     }
     
@@ -471,6 +559,30 @@ function toggleSound() {
         const button = document.getElementById('soundToggle');
         button.textContent = enabled ? '🔊' : '🔇';
         button.classList.toggle('muted', !enabled);
+    }
+}
+
+function toggleHighScores() {
+    const panel = document.getElementById('highScorePanel');
+    const isVisible = panel.style.display === 'block';
+    
+    if (isVisible) {
+        panel.style.display = 'none';
+    } else {
+        panel.style.display = 'block';
+        if (game) {
+            game.updateHighScoreDisplay();
+        }
+    }
+}
+
+function clearHighScores() {
+    if (confirm('Are you sure you want to clear all high scores? This action cannot be undone.')) {
+        if (game && game.highScoreManager) {
+            game.highScoreManager.clearScores();
+            game.updateHighScoreDisplay();
+            alert('High scores cleared!');
+        }
     }
 }
 

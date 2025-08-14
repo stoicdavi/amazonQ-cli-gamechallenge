@@ -10,9 +10,11 @@
     <div class="game-container">
         <div class="back-button-container">
             <button class="back-button" onclick="goHome()">← Back to Menu</button>
+            <button class="high-score-button" onclick="toggleHighScores()">🏆 High Scores</button>
         </div>
         <div class="hud">
             <div>Score: <span id="score">0</span></div>
+            <div>High: <span id="highScore">0</span></div>
             <div>Wave: <span id="wave">1</span></div>
             <div>Humans: <span id="humans">8</span></div>
             <div>Lives: <span id="lives">3</span></div>
@@ -27,8 +29,30 @@
         
         <div class="game-over" id="gameOver">
             <h2>GAME OVER</h2>
-            <p>Final Score: <span id="finalScore">0</span></p>
-            <p>Press SPACE to restart</p>
+            <div class="final-stats">
+                <div class="stat-row">
+                    <span>Final Score:</span>
+                    <span id="finalScore">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Wave Reached:</span>
+                    <span id="finalWave">1</span>
+                </div>
+                <div class="stat-row">
+                    <span>Humans Rescued:</span>
+                    <span id="finalHumansRescued">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Robots Destroyed:</span>
+                    <span id="finalRobotsDestroyed">0</span>
+                </div>
+            </div>
+            <div class="score-ranking" id="scoreRanking"></div>
+            <div class="game-over-buttons">
+                <button onclick="game.restart()" class="restart-button">🔄 Play Again</button>
+                <button onclick="toggleHighScores()" class="view-scores-button">🏆 View High Scores</button>
+            </div>
+            <p class="restart-hint">Press SPACE to restart</p>
         </div>
         
         <div class="congratulations" id="congratulations">
@@ -38,13 +62,60 @@
                 <div class="congrats-details" id="congratsDetails"></div>
             </div>
         </div>
+
+        <div class="high-score-panel" id="highScorePanel">
+            <div class="high-score-content">
+                <div class="high-score-header">
+                    <h2>🏆 High Scores</h2>
+                    <button class="close-button" onclick="toggleHighScores()">✕</button>
+                </div>
+                
+                <div class="high-score-tabs">
+                    <button class="tab-button active" onclick="showScoresTab()">Top Scores</button>
+                    <button class="tab-button" onclick="showStatsTab()">Statistics</button>
+                </div>
+                
+                <div class="high-score-body">
+                    <div class="scores-tab" id="scoresTab">
+                        <div class="high-scores-list" id="highScoresList">
+                            <!-- Scores will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="stats-tab" id="statsTab" style="display: none;">
+                        <div class="high-score-stats" id="highScoreStats">
+                            <!-- Stats will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="high-score-footer">
+                    <button class="clear-scores-button" onclick="clearHighScores()">🗑️ Clear All Scores</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="sounds.js"></script>
+    <script src="highscore.js"></script>
     <script src="game.js"></script>
     <script>
         function goHome() {
             window.location.href = 'index.html';
+        }
+
+        function showScoresTab() {
+            document.getElementById('scoresTab').style.display = 'block';
+            document.getElementById('statsTab').style.display = 'none';
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function showStatsTab() {
+            document.getElementById('scoresTab').style.display = 'none';
+            document.getElementById('statsTab').style.display = 'block';
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
         }
     </script>
 </body>

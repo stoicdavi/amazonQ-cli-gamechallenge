@@ -25,6 +25,13 @@
         <section class="instructions">
             <h2>How to Play</h2>
             
+            <div class="high-score-preview" id="highScorePreview">
+                <div class="high-score-display">
+                    <span class="high-score-label">🏆 High Score:</span>
+                    <span class="high-score-value" id="landingHighScore">0</span>
+                </div>
+            </div>
+            
             <div class="controls-grid">
                 <div class="control-group">
                     <h3>Movement</h3>
@@ -94,10 +101,25 @@
         </footer>
     </div>
 
+    <script src="highscore.js"></script>
     <script>
         function startGame() {
             window.location.href = 'game.html';
         }
+
+        // Load and display high score on landing page
+        document.addEventListener('DOMContentLoaded', function() {
+            const highScoreManager = new HighScoreManager();
+            const highScore = highScoreManager.getHighScore();
+            const highScoreElement = document.getElementById('landingHighScore');
+            
+            if (highScore > 0) {
+                highScoreElement.textContent = highScore.toLocaleString();
+                document.getElementById('highScorePreview').style.display = 'block';
+            } else {
+                document.getElementById('highScorePreview').style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
